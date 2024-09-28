@@ -28,7 +28,8 @@ function DocumentList({ documentList, params }) {
             {!doc.emoji && <Image src={'/loopdocument.svg'} width={20} height={20} />}
             <h2 className='flex gap-2'> {doc?.emoji} {doc.documentName}</h2>
           </div>
-          <DocumentOptions doc={doc} deleteDocumentFromState={deleteDocumentFromState} />
+          {/* Pass documentData instead of doc, and pass deleteDocument */}
+          <DocumentOptions documentData={doc} deleteDocument={deleteDocumentFromState} />
         </div>
       ))}
     </div>
