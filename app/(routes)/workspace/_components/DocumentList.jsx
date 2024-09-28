@@ -1,4 +1,4 @@
-"use client"; // This line must be at the very top
+"use client"; // Ensure the component runs on the client side only
 
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -16,20 +16,19 @@ function DocumentList({ documentList, params }) {
 
   return (
     <div>
-      {documentList.map((doc, index) => (
+      {documentList.map((documentData, index) => (
         <div
           key={index}
-          onClick={() => router.push('/workspace/' + params?.workspaceid + "/" + doc?.id)}
+          onClick={() => router.push('/workspace/' + params?.workspaceid + "/" + documentData?.id)}
           className={`mt-3 p-2 px-3 hover:bg-gray-200 
           rounded-lg cursor-pointer flex justify-between items-center
-          ${doc?.id == params?.documentid && 'bg-white'}`}
+          ${documentData?.id == params?.documentid && 'bg-white'}`}
         >
           <div className='flex gap-2 items-center'>
-            {!doc.emoji && <Image src={'/loopdocument.svg'} width={20} height={20} />}
-            <h2 className='flex gap-2'> {doc?.emoji} {doc.documentName}</h2>
+            {!documentData.emoji && <Image src={'/loopdocument.svg'} width={20} height={20} alt="document-icon" />}
+            <h2 className='flex gap-2'> {documentData?.emoji} {documentData.documentName}</h2>
           </div>
-          {/* Pass documentData instead of doc, and pass deleteDocument */}
-          <DocumentOptions documentData={doc} deleteDocument={deleteDocumentFromState} />
+          <DocumentOptions documentData={documentData} deleteDocument={deleteDocumentFromState} />
         </div>
       ))}
     </div>
