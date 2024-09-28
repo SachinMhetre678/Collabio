@@ -4,7 +4,6 @@ import SideNav from '../../_components/SideNav'
 import DocumentEditorSection from '../../_components/DocumentEditiorSection'
 import DocumentList from '../../_components/DocumentList'
 import { Room } from '../../../../Room';
-// import { Room } from '../../../Room';
 
 function WorkspaceDocument({params}) {
 

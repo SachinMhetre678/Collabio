@@ -1,6 +1,6 @@
 "use client"
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Loader2Icon, SmilePlus } from 'lucide-react';
 import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
@@ -28,6 +28,13 @@ function CreateWorkspace() {
     const {orgId}=useAuth();
     const [loading,setLoading]=useState(false);
     const router=useRouter();
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+          // This code will only run in the browser
+          console.log('Window is defined:', window);
+        }
+      }, []);
 
     /**
      * Used to create new workspace and save data in database

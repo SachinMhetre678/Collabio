@@ -1,3 +1,5 @@
+"use client"; // This line must be at the very top
+
 import { Link2Icon, MoreVertical, PenBox, Trash2 } from 'lucide-react';
 import React from 'react';
 import {

@@ -1,3 +1,5 @@
+"use client"; // This line must be at the very top
+
 import React, { useState } from 'react';
 import DocumentHeader from './DocumentHeader'; // Ensure correct
 import DocumentInfo from './DocumentInfo';     // Ensure correct
