@@ -14,6 +14,13 @@ import { v4 as uuidv4 } from 'uuid'; // Import from uuid
 
 function CreateWorkspace() {
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+          // This code will only run in the browser
+          console.log('Window is defined:', window);
+        }
+      }, []);
+
     const [coverImage,setCoverImage]=useState('/cover.png');
     const [workspaceName,setWorkspaceName]=useState();
     const [emoji,setEmoji]=useState();
