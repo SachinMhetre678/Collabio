@@ -54,7 +54,7 @@ To get started with Collabio, follow these steps:
 ## 🎨 Preview
 
 ### Here's a sneak peek of what Collabio looks like!
-
+![image](https://github.com/SachinMhetre678/Collabio/blob/master/public/image.png?raw=true)
 
 ### Interactive Demo
 Check out our live demo here: [Collabio Live Demo](colabio.vercel.app)
