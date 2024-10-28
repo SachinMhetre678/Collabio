@@ -2,8 +2,6 @@
 
 Welcome to **Collabio**! A collaborative workspace management application designed to enhance productivity and streamline document handling. With features tailored for teams and individual users, Collabio brings together powerful document management, real-time collaboration, and an intuitive design.
 
----
-
 ## 🌟 Features
 
 ### Dynamic Document Management
