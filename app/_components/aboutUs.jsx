@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { motion, useScroll, useTransform, useSpring, useInView } from 'framer-motion';
 import { 
   ArrowRight, 
   Check, 
@@ -11,10 +11,157 @@ import {
   Zap,
   Sparkles, 
   Code,
-  ChevronRight
+  ChevronRight,
+  MousePointer
 } from 'lucide-react';
 
+// Separate the AnimatedCounter into its own component
+const AnimatedCounter = ({ value, duration = 2 }) => {
+  const [count, setCount] = useState(0);
+  
+  useEffect(() => {
+    let start = 0;
+    const end = parseInt(value);
+    const incrementTime = (duration * 1000) / end;
+    
+    const timer = setInterval(() => {
+      start += 1;
+      setCount(start);
+      if (start === end) clearInterval(timer);
+    }, incrementTime);
+
+    return () => clearInterval(timer);
+  }, [value, duration]);
+  
+  return count;
+};
+
+// Separate FeatureCard component
+const FeatureCard = ({ feature, index }) => {
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  
+  const cardVariants = {
+    hidden: { 
+      opacity: 0,
+      y: 50,
+      scale: 0.9,
+      rotateX: -15
+    },
+    visible: { 
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      rotateX: 0,
+      transition: {
+        type: "spring",
+        damping: 20,
+        stiffness: 100,
+        delay: index * 0.1
+      }
+    }
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      variants={cardVariants}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      className="group relative bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden"
+    >
+      <div className={`absolute top-0 left-0 w-32 h-32 bg-gradient-to-br ${feature.gradient} opacity-5 rounded-br-[100%] transition-all duration-500 group-hover:scale-[2]`} />
+      <div className={`absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl ${feature.gradient} opacity-5 rounded-tl-[100%] transition-all duration-500 group-hover:scale-[2]`} />
+      
+      <div className="relative z-10">
+        <motion.div 
+          className="flex items-start space-x-4"
+          whileHover={{ x: 5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <motion.div 
+            className="flex-shrink-0"
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.5 }}
+          >
+            <div className={`p-3 rounded-xl bg-gradient-to-r ${feature.gradient} text-white transform transition-transform group-hover:scale-110 ${feature.shadowColor}`}>
+              {feature.icon}
+            </div>
+          </motion.div>
+          <div className="flex-1">
+            <h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center group-hover:text-transparent bg-clip-text bg-gradient-to-r group-hover:bg-gradient-to-r transition-all duration-300">
+              {feature.title}
+              <motion.div
+                initial={{ x: -10, opacity: 0 }}
+                whileHover={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </motion.div>
+            </h4>
+            <p className="text-gray-600 leading-relaxed">
+              {feature.description}
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+};
+
+// Separate StatCard component
+const StatCard = ({ stat }) => {
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true });
+
+  return (
+    <motion.div 
+      ref={ref}
+      initial={{ scale: 0.5, opacity: 0 }}
+      animate={isInView ? { scale: 1, opacity: 1 } : { scale: 0.5, opacity: 0 }}
+      transition={{ type: "spring", stiffness: 100, damping: 15 }}
+      whileHover={{ scale: 1.05 }}
+      className="relative group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+    >
+      <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+      <div className="relative z-10">
+        <div className={`text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient}`}>
+          {isInView ? <AnimatedCounter value={stat.value.replace(/\D/g, '')} /> : 0}
+          {stat.value.replace(/\d/g, '')}
+        </div>
+        <div className="mt-2 text-sm font-medium text-gray-900">
+          {stat.label}
+        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileHover={{ opacity: 1, y: 0 }}
+          className="mt-1 text-xs text-gray-600"
+        >
+          {stat.description}
+        </motion.div>
+      </div>
+    </motion.div>
+  );
+};
+
 const AboutUs = () => {
+  const { scrollYProgress } = useScroll();
+  const springScroll = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
+  
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePosition({
+        x: e.clientX,
+        y: e.clientY
+      });
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
   const features = [
     {
       icon: <Users className="w-7 h-7" />,
@@ -94,136 +241,109 @@ const AboutUs = () => {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-gray-50">
-      {/* Enhanced Background Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-purple-50" />
-      <div className="absolute inset-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-96 bg-gradient-to-br from-blue-100/40 to-indigo-100/40 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-1/4 w-[1000px] h-96 bg-gradient-to-tr from-purple-100/30 to-pink-100/30 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 right-0 w-[800px] h-96 bg-gradient-to-tl from-emerald-100/30 to-cyan-100/30 rounded-full blur-3xl" />
-      </div>
+    <section className="relative overflow-hidden bg-gray-50 min-h-screen">
+      <motion.div 
+        className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-blue-50 via-white to-purple-50"
+        style={{
+          backgroundPosition: `${mousePosition.x / 20}px ${mousePosition.y / 20}px`
+        }}
+      />
+      
+      <motion.div
+        className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 transform-origin-left"
+        style={{ scaleX: springScroll }}
+      />
 
       <div className="relative py-32">
         <div className="container mx-auto px-4">
           <div className="max-w-6xl mx-auto">
-            {/* Enhanced Hero Section */}
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 50 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
+              transition={{ 
+                duration: 0.8,
+                type: "spring",
+                stiffness: 100
+              }}
               className="text-center"
             >
-              {/* <div className="inline-flex items-center justify-center p-2 rounded-full bg-white shadow-xl shadow-blue-500/20 mb-8">
-                <span className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-sm font-medium">
-                  Welcome to the Future of Collaboration
-                </span>
-              </div> */}
-              <h1 className="text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 leading-tight">
+              <motion.h1 
+                className="text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 leading-tight"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
                 Transforming
                 <br />
                 Collaboration
-              </h1>
-              <div className="mt-8 space-y-6 text-center max-w-3xl mx-auto">
+              </motion.h1>
+              
+              <motion.div 
+                className="mt-8 space-y-6 text-center max-w-3xl mx-auto"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
                 <p className="text-xl text-gray-600 leading-relaxed">
                   Welcome to <span className="font-semibold text-blue-600">Collabio</span>, 
                   where innovation meets simplicity. Developed by 
                   <span className="font-semibold text-blue-600"> Sachin Mhetre</span>, 
                   this project showcases the future of digital collaboration.
                 </p>
-              </div>
+              </motion.div>
             </motion.div>
 
-            {/* Enhanced Stats Section */}
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8"
-            >
+            <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map((stat, index) => (
-                <div 
-                  key={index} 
-                  className="relative group bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-5 transition-opacity duration-300" />
-                  <div className="relative z-10">
-                    <div className={`text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${stat.gradient}`}>
-                      {stat.value}
-                    </div>
-                    <div className="mt-2 text-sm font-medium text-gray-900">
-                      {stat.label}
-                    </div>
-                    <div className="mt-1 text-xs text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      {stat.description}
-                    </div>
-                  </div>
-                </div>
+                <StatCard key={index} stat={stat} />
               ))}
-            </motion.div>
+            </div>
 
-            {/* Enhanced Features Section */}
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
               className="mt-32"
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
             >
-              <h3 className="text-4xl font-bold text-center text-gray-900 mb-16">
+              <motion.h3 
+                className="text-4xl font-bold text-center text-gray-900 mb-16"
+                initial={{ y: 50, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ type: "spring", stiffness: 100 }}
+              >
                 Why Choose Collabio
-              </h3>
+              </motion.h3>
+              
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.1 * index }}
-                    key={index}
-                    className="group relative bg-white rounded-2xl p-8 hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden"
-                  >
-                    {/* Gradient corners */}
-                    <div className={`absolute top-0 left-0 w-32 h-32 bg-gradient-to-br ${feature.gradient} opacity-5 rounded-br-[100%] transition-all duration-500 group-hover:scale-150`} />
-                    <div className={`absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl ${feature.gradient} opacity-5 rounded-tl-[100%] transition-all duration-500 group-hover:scale-150`} />
-                    
-                    <div className="relative z-10">
-                      <div className="flex items-start space-x-4">
-                        <div className="flex-shrink-0">
-                          <div className={`p-3 rounded-xl bg-gradient-to-r ${feature.gradient} text-white transform transition-transform group-hover:scale-110 ${feature.shadowColor}`}>
-                            {feature.icon}
-                          </div>
-                        </div>
-                        <div className="flex-1">
-                          <h4 className="text-xl font-semibold text-gray-900 mb-3 flex items-center group-hover:text-transparent bg-clip-text bg-gradient-to-r group-hover:bg-gradient-to-r transition-all duration-300 transform">
-                            {feature.title}
-                            <ArrowRight className="ml-2 w-4 h-4 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0" />
-                          </h4>
-                          <p className="text-gray-600 leading-relaxed">
-                            {feature.description}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+                  <FeatureCard key={index} feature={feature} index={index} />
                 ))}
               </div>
             </motion.div>
 
-            {/* Enhanced Bottom CTA Section */}
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
               className="mt-32 text-center"
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ type: "spring", stiffness: 100 }}
             >
-              <div className="inline-flex items-center justify-center p-3 rounded-full bg-gradient-to-r from-blue-500/10 to-indigo-500/10">
+              <motion.div 
+                className="inline-flex items-center justify-center p-3 rounded-full bg-gradient-to-r from-blue-500/10 to-indigo-500/10"
+                whileHover={{ scale: 1.1, rotate: 180 }}
+                transition={{ type: "spring", stiffness: 200, damping: 10 }}
+              >
                 <Sparkles className="w-8 h-8 text-blue-600" />
-              </div>
-              <h4 className="mt-6 text-3xl font-semibold text-gray-900">Ready to explore Collabio?</h4>
-              <p className="mt-3 text-lg text-gray-600">Experience the next generation of collaboration tools</p>
-              <div className="mt-8">
-                <button className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all duration-300">
-                  Get Started Now
-                </button>
-              </div>
+              </motion.div>
+              
+              <motion.button
+                className="mt-8 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full font-medium shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transform hover:-translate-y-0.5 transition-all duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <a href='/dashboard'>Get Started</a>
+              </motion.button>
             </motion.div>
           </div>
         </div>

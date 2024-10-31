@@ -60,7 +60,7 @@ function Header() {
             <Button
               className="bg-primary hover:bg-primary/90 text-white rounded-full px-6 py-2 transition-all duration-200 transform hover:scale-105 active:scale-95"
             >
-              Get Started
+              <a href='/dashboard'>Get Started</a>
             </Button>
           </div>
 

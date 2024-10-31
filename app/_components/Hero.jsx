@@ -1,15 +1,19 @@
 'use client';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Zap, Heart, DollarSign } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { motion, useScroll, useTransform, useMotionValue, useSpring, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Sparkles, Zap, Heart, DollarSign, MousePointer2 } from 'lucide-react';
 
 function Hero() {
-  const fadeIn = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-  };
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+  const { scrollY } = useScroll();
+  
+  const y = useMotionValue(0);
+  const smoothY = useSpring(y, { damping: 15, stiffness: 100 });
+  
+  const headerOpacity = useTransform(scrollY, [0, 100], [1, 0.8]);
+  const headerScale = useTransform(scrollY, [0, 100], [1, 0.95]);
 
   const features = [
     {
@@ -32,32 +36,95 @@ function Hero() {
     }
   ];
 
+  // Animated background follow mouse effect
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      const { clientX, clientY } = e;
+      setMousePosition({ x: clientX, y: clientY });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  // Animated words for the header
+  const words = ["collaboration", "innovation", "creativity"];
+  const [currentWord, setCurrentWord] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWord((prev) => (prev + 1) % words.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="relative min-h-screen flex items-center" id="home">
-      {/* Enhanced Background Effects */}
-      <div className="absolute inset-0 overflow-hidden">
+    <div className="relative min-h-screen flex items-center overflow-hidden" id="home">
+      {/* Dynamic Background */}
+      <motion.div 
+        className="absolute inset-0 overflow-hidden"
+        style={{
+          background: `radial-gradient(circle at ${mousePosition.x}px ${mousePosition.y}px, rgba(147, 51, 234, 0.1) 0%, rgba(79, 70, 229, 0.05) 40%, transparent 60%)`
+        }}
+      >
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div aria-hidden="true" className="absolute inset-0">
-          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-gradient-to-r from-primary/20 to-purple-400/20 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-gradient-to-l from-cyan-400/20 to-sky-300/20 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
-        </div>
-      </div>
+        
+        {/* Floating Elements */}
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 90, 180, 270, 360],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-primary/10 to-purple-400/10 rounded-full blur-3xl"
+        />
+        
+        <motion.div
+          animate={{
+            scale: [1.2, 1, 1.2],
+            rotate: [360, 270, 180, 90, 0],
+          }}
+          transition={{
+            duration: 15,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-to-l from-cyan-400/10 to-sky-300/10 rounded-full blur-3xl"
+        />
+      </motion.div>
 
       <div className="relative w-full">
-        <div className="relative pt-20 pb-16 sm:pt-30 sm:pb-24">
+        <motion.div 
+          className="relative pt-20 pb-16 sm:pt-30 sm:pb-24"
+          style={{ opacity: headerOpacity, scale: headerScale }}
+        >
           <div className="lg:w-3/4 max-w-6xl mx-auto px-4">
             {/* Main Content */}
             <motion.div 
               className="text-center"
-              initial="initial"
-              animate="animate"
-              variants={fadeIn}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8 }}
             >
-              {/* Decorative element */}
+              {/* Animated Badge */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1,
+                  y: [0, -10, 0]
+                }}
+                transition={{
+                  y: {
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }
+                }}
                 className="inline-flex mb-8 p-2 bg-white/5 backdrop-blur-xl rounded-full border border-gray-200/20 shadow-lg"
               >
                 <div className="px-4 py-1 rounded-full bg-gradient-to-r from-primary/80 to-purple-600/80 text-white text-sm font-medium flex items-center gap-2">
@@ -66,59 +133,66 @@ function Hero() {
                 </div>
               </motion.div>
 
+              {/* Animated Header */}
               <motion.h1 
                 className="text-gray-900 dark:text-white font-bold text-5xl md:text-6xl xl:text-7xl tracking-tight"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.8 }}
               >
                 Collabio is where{' '}
-                <span className="relative">
-                  <span className="relative inline-block text-primary dark:text-white">
-                    collaboration thrives
-                    <div className="absolute bottom-0 left-0 w-full h-2 bg-primary/20 dark:bg-white/20 rounded-full transform -rotate-1"></div>
-                  </span>
-                  .
-                </span>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={currentWord}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="relative inline-block text-primary dark:text-white"
+                  >
+                    {words[currentWord]} thrives
+                    <motion.div 
+                      className="absolute bottom-0 left-0 w-full h-2 bg-primary/20 dark:bg-white/20 rounded-full"
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ duration: 0.8 }}
+                    />
+                  </motion.span>
+                </AnimatePresence>
               </motion.h1>
 
-              <motion.p 
-                className="mt-8 text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-              >
-                Collabio is an innovative workspace designed for teams to create, share, and collaborate on projects effortlessly. Our platform integrates flexible pages with reusable components, ensuring that your team stays organized and in sync across all applications.
-              </motion.p>
-
-              {/* CTA Buttons */}
+              {/* Interactive CTA Buttons */}
               <motion.div 
                 className="mt-16 flex flex-wrap justify-center gap-y-4 gap-x-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
-                <a
+                <motion.a
                   href="/dashboard"
-                  className="group relative flex h-12 items-center justify-center px-8 before:absolute before:inset-0 before:rounded-full before:bg-primary before:transition before:duration-300 hover:before:scale-105 active:duration-75 active:before:scale-95 sm:w-max"
+                  className="group relative flex h-12 items-center justify-center px-8 overflow-hidden rounded-full bg-primary"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <span className="relative flex items-center gap-2 text-base font-semibold text-white">
+                  <motion.span 
+                    className="absolute inset-0 bg-white"
+                    initial={{ scale: 0 }}
+                    whileHover={{ scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ borderRadius: '9999px' }}
+                  />
+                  <span className="relative flex items-center gap-2 text-base font-semibold text-white group-hover:text-primary">
                     Get started
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                    <motion.span
+                      whileHover={{ x: 5 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <ArrowRight className="w-4 h-4" />
+                    </motion.span>
                   </span>
-                </a>
-                <a
-                  href="#"
-                  className="group relative flex h-12 items-center justify-center px-8 before:absolute before:inset-0 before:rounded-full before:border before:border-transparent before:bg-primary/10 before:bg-gradient-to-b before:transition before:duration-300 hover:before:scale-105 active:duration-75 active:before:scale-95 dark:before:border-gray-700 dark:before:bg-gray-800 sm:w-max"
-                >
-                  <span className="relative flex items-center gap-2 text-base font-semibold text-primary dark:text-white">
-                    Learn more
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </a>
+                </motion.a>
               </motion.div>
 
-              {/* Features Section */}
+              {/* Animated Features Grid */}
               <motion.div 
                 className="hidden sm:block mt-24 border-t border-gray-100 dark:border-gray-800 pt-10"
                 initial={{ opacity: 0 }}
@@ -132,12 +206,25 @@ function Hero() {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.6, delay: 0.2 * index }}
+                      whileHover={{ 
+                        scale: 1.05,
+                        transition: { duration: 0.2 }
+                      }}
                       className="group relative bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-2xl p-6 hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700"
                     >
-                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${feature.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}></div>
-                      <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center text-white mb-4`}>
+                      <motion.div 
+                        className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${feature.gradient}`}
+                        initial={{ opacity: 0 }}
+                        whileHover={{ opacity: 0.1 }}
+                        transition={{ duration: 0.3 }}
+                      />
+                      <motion.div 
+                        className={`w-12 h-12 rounded-xl bg-gradient-to-r ${feature.gradient} flex items-center justify-center text-white mb-4`}
+                        whileHover={{ rotate: 360 }}
+                        transition={{ duration: 0.6 }}
+                      >
                         {feature.icon}
-                      </div>
+                      </motion.div>
                       <h6 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                         {feature.title}
                       </h6>
@@ -150,7 +237,7 @@ function Hero() {
               </motion.div>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
