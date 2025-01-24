@@ -52,7 +52,7 @@ To get started with Collabio, follow these steps:
 ## 🎨 Preview
 
 ### Here's a sneak peek of what Collabio looks like!
-![image](https://github.com/SachinMhetre678/Collabio/blob/master/public/image.png?raw=true)
+![image](https://github.com/user-attachments/assets/f575f265-fa90-41b3-9a47-4ec202858f71)
 
 ### Interactive Demo
 Check out our live demo here: [Collabio Live Demo](colabio.vercel.app)
@@ -91,7 +91,7 @@ We would love your help in making Collabio even better! Here’s how you can con
 
 ## 📧 Contact
 
-For any inquiries, please reach out to us at [your.email@example.com](mailto:your.email@example.com).
+For any inquiries, please reach out to us at [sachinmhetre678@gmail.com](mailto:sachinmhetre678@gmail.com).
 
 ---
 
